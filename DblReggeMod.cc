@@ -12,39 +12,33 @@
 #include "DblReggeMod.h"
 
 
-
 double si[2];
 double alp[2];
-
 
 
 DblReggeMod::DblReggeMod( const vector< string >& args ) :
 	UserAmplitude< DblReggeMod >( args )
 {       
-	assert( args.size() == 15 );
+	assert( args.size() == 18 );
 	b_par = AmpParameter( args[0] );
 	c0 = AmpParameter( args[1]);
 	c1 = AmpParameter( args[2]);
 	c2 = AmpParameter( args[3]);
 	n0 = AmpParameter( args[4]);
 	n1 = AmpParameter( args[5]);
-	n2 = AmpParameter( args[6]);		
-	a0 = AmpParameter(args[7]);
-	a1 = AmpParameter(args[8]);
-	a2 = AmpParameter(args[9]);
-	a3 = AmpParameter(args[10]);
-	a4 = AmpParameter(args[11]);
+	n2 = AmpParameter( args[6]);
+	d10 = AmpParameter(args[7]);
+	d11 = AmpParameter( args[8]); 
+	d12 = AmpParameter( args[9]);
+	d20 = AmpParameter( args[10] );
+	d21 = AmpParameter( args[11] );
+	d22 = AmpParameter( args[12] );	
+	aPrime = AmpParameter(args[13] );
+	a0 = AmpParameter(args[14]);
+	S0 = AmpParameter( args[15] );
+	fastParticle = atoi(args[16].c_str());
+	charge = atoi( args[17].c_str() );
 
-	S0 = AmpParameter( args[12] );
-	fastParticle = atoi(args[13].c_str());
-	charge = atoi( args[14].c_str() );
-
-
-	registerParameter( a0 );
-	registerParameter(a1);
-	registerParameter(a2);	
-	registerParameter(a3);
-	registerParameter(a4);	
 	registerParameter( b_par );
 	registerParameter( c0 );
 	registerParameter( c1 );
@@ -52,29 +46,29 @@ DblReggeMod::DblReggeMod( const vector< string >& args ) :
 	registerParameter( n0 );
 	registerParameter( n1 );
 	registerParameter( n2 );
+	registerParameter(d10);
+	registerParameter( d11 );
+	registerParameter( d12 );
+	registerParameter(d20);
+	registerParameter( d21 );
+	registerParameter( d22 );
+	registerParameter( aPrime);
+	registerParameter( a0 );
 	registerParameter( S0 );
 
 }
 
-/*void DblReggeMod::init(){
-  updatePar(S0);
-  updatePar(a_pi);
-  updatePar(a_eta);
-  updatePar(b_pi);
-  updatePar(b_eta);
-  }*/
 
 complex< GDouble >
 DblReggeMod::calcAmplitude( GDouble** pKin, GDouble* userVars ) const {
-	GDouble s12 = userVars[u_s12];
 
+	GDouble s12 = userVars[u_s12];
 	GDouble s23 = userVars[u_s23];
 	GDouble t1 = userVars[u_t1];
 	GDouble s = userVars[u_s];
 	GDouble u3 = userVars[u_u3];
-	GDouble phi = userVars[u_phi];
 
-	double param[12] = {b_par,c0,c1,c2,n0,n1,n2,a0,a1,a2,a3,a4};
+	double param[17] = {b_par,c0,c1,c2,n0,n1,n2,d10,d11,d12,d20,d21,d22,aPrime,a0,S0};
 	double inv[5] = {s, s12, s23, t1 ,u3};
 
 	double mass2[4] = { userVars[u_beamM2], userVars[u_p1M2], userVars[u_p2M2], userVars[u_recoilM2]};
@@ -90,9 +84,6 @@ DblReggeMod::calcAmplitude( GDouble** pKin, GDouble* userVars ) const {
 	//cout << "t1: " << t1 << endl;
 	//cout << "u3: " << u3 << endl;
 	//}
-	//double term=a0 + a1*cos(s23);	
-	double term=a0 + a1*cos(phi) +a2*cos(2*phi) +a3*cos(3*phi) + a4*cos(4*phi);
-	amp*= term;
 	return amp;
 }
 
@@ -115,26 +106,9 @@ void DblReggeMod::calcUserVars( GDouble** pKin, GDouble* userVars ) const{
 	userVars[u_p2M2] = p2.M2();
 	userVars[u_recoilM2] = recoil.M2();
 
-
-	TLorentzRotation resRestBoost( -resonance.BoostVector() );
-
-	TLorentzVector beam_res   = resRestBoost * beam;
-	TLorentzVector recoil_res = resRestBoost * recoil;
-	TLorentzVector p2_res = resRestBoost * p1;
-	TVector3 z = beam_res.Vect().Unit();
-	TVector3 y = recoil_res.Vect().Cross(-z).Unit();
-	TVector3 x = y.Cross(z);
-
-	TVector3 angles( (p2_res.Vect()).Dot(x),
-			(p2_res.Vect()).Dot(y),
-			(p2_res.Vect()).Dot(z) );
-
-
-	userVars[u_phi] = angles.Phi();
-
 }
 
-std::complex<double> DblReggeMod::ampEtaPi0(double par[12], int hel[3], double inv[5], double mass2[4]) const{
+std::complex<double> DblReggeMod::ampEtaPi0(double par[11], int hel[3], double inv[5], double mass2[4]) const{
 
 	std::complex<double> zero (0,0);
 
@@ -147,11 +121,11 @@ std::complex<double> DblReggeMod::ampEtaPi0(double par[12], int hel[3], double i
 	double t2  = -t1+u3-s12+ma2+m12+m22;
 	double s13 = s-s12-s23+m12+m22+m32;
 
-	// scalar part
-	double app = 0.9;     // slope of Regge trajectories alpha'
-	double alp0eta = app*t1 + 0.5;
-	double alp0pi0 = app*t2 + 0.5;
-	double alp1    = app*u3 + 0.5;
+		// scalar part
+     // slope of Regge trajectories alpha'
+	double alp0eta = aPrime*t1 + a0;
+	double alp0pi0 = aPrime*t2 + a0;
+	double alp1    = aPrime*u3 + a0;
 	int tau[2];
 
 	if(charge ==0){
@@ -170,18 +144,19 @@ std::complex<double> DblReggeMod::ampEtaPi0(double par[12], int hel[3], double i
 	double Bot1, Bot2;
 
 	if(fastParticle == 2){
-
+	
 		ADR1 = DoubleRegge(tau, s, si, alp); // fast eta
-		Bot1 = exp(b_par*b_par*t1 ) * sqrt(n0*exp(c0*u3) + n1*exp(c1*u3)*u3 + n2*exp(c2*u3)*u3*u3);
+		Bot1 = exp(b_par*b_par*t1 )* sqrt(n0*exp(c0*c0*u3) + n1*exp(c1*c1*u3)*u3 + n2*exp(c2*c2*u3)*u3*u3) ;
 	}
 	else{
 		ADR1 = (0,0);
 		Bot1 = 0;
 	}
 	si[1] = s13; alp[0] = alp0pi0;
+	
 	if(fastParticle == 3){
 		ADR2 = DoubleRegge(tau, s, si, alp); // fast pi0
-		Bot2 = exp(b_par*b_par*t2 )* sqrt(n0*exp(c0*u3) + n1*exp(c1*u3)*u3 + n2*exp(c2*u3)*u3*u3);
+		Bot2 = exp(b_par*b_par*t2) * sqrt(n0*exp(c0*c0*u3) + n1*exp(c1*c1*u3)*u3 + n2*exp(c2*c2*u3)*u3*u3);
 	}
 	else{
 		Bot2 = 0;
@@ -197,16 +172,12 @@ std::complex<double> DblReggeMod::ampEtaPi0(double par[12], int hel[3], double i
 	return fac3*(Bot1*fac1*ADR1 + Bot2*fac2*ADR2 );
 }
 
-std::complex<double> DblReggeMod::V12(double alp1, double alp2, double eta) const{
-
-	if(alp1==alp2 ){return 0.0;}
-	std::complex<double> res = CHGM(-alp1, 1.-alp1+alp2, -1/eta);
-	res *= cgamma(alp1-alp2,0)/cgamma(-alp2,0);
-
+double DblReggeMod::V12(double d0, double d1, double d2,double si[2]) const{
+	double res = d0 + si[0]*d1 + si[1]*d2;
 	return res;
 }
 
-std::complex<double> DblReggeMod::DoubleRegge(int tau[2], double s, double si[2], double alp[2]) const{
+std::complex<double> DblReggeMod::DoubleRegge( int tau[2], double s, double si[2], double alp[2]) const{
 	std::complex<double> ui (0,1);
 	// signature factors:
 
@@ -217,8 +188,8 @@ std::complex<double> DblReggeMod::DoubleRegge(int tau[2], double s, double si[2]
 	// double Regge vertices:
 
 	double eta = S0*s/(si[0]*si[1]);
-	std::complex<double> V0 = V12(alp[0], alp[1], eta);
-	std::complex<double> V1 = V12(alp[1], alp[0], eta);
+	std::complex<double> V0 = V12(d10,d11,d12, si);
+	std::complex<double> V1 = V12(d20,d21,d22, si);
 	std::complex<double> up1 = pow(s/S0,alp[1])*pow(si[0]/S0,alp[0]-alp[1]);
 	std::complex<double> up2 = pow(s/S0,alp[0])*pow(si[1]/S0,alp[1]-alp[0]);
 
@@ -227,178 +198,10 @@ std::complex<double> DblReggeMod::DoubleRegge(int tau[2], double s, double si[2]
 
 	std::complex<double> t1 =up1*x1*x01*V1;
 	std::complex<double> t0 = up2*x0*x10*V0;
-	return (t0+t1)*cgamma(-alp[0],0)*cgamma(-alp[1],0);;
+	//return (t0+t1)*cgamma(-alp[0],0)*cgamma(-alp[1],0);;
+	return (t0+t1);
 }
 
-std::complex<double> DblReggeMod::cgamma(std::complex<double> z,int OPT) const{
-	std::complex<double> ui (0,1);
-	std::complex<double> g, infini= 1e308+ 0.0*ui; // z0,z1
-	double x0,q1,q2,x,y,th,th1,th2,g0,gr,gi,gr1,gi1;
-	double na=0.0,t,x1 = 1,y1=0.0,sr,si;
-	int j,k;
-
-
-	static double a[] = {
-		8.333333333333333e-02,
-		-2.777777777777778e-03,
-		7.936507936507937e-04,
-		-5.952380952380952e-04,
-		8.417508417508418e-04,
-		-1.917526917526918e-03,
-		6.410256410256410e-03,
-		-2.955065359477124e-02,
-		1.796443723688307e-01,
-		-1.39243221690590};
-
-	x = real(z);
-	y = imag(z);
-
-	if (x > 171) return infini;
-	if ((y == 0.0) && (x == (int)x) && (x <= 0.0))
-		return infini;
-	else if (x < 0.0) {
-		x1 = x;
-		y1 = y;
-		x = -x;
-		y = -y;
-	}
-	x0 = x;
-	if (x <= 7.0) {
-		na = (int)(7.0-x);
-		x0 = x+na;
-	}
-	q1 = sqrt(x0*x0+y*y);
-	th = atan(y/x0);
-	gr = (x0-0.5)*log(q1)-th*y-x0+0.5*log(2.0*M_PI);
-	gi = th*(x0-0.5)+y*log(q1)-y;
-	for (k=0;k<10;k++){
-		t = pow(q1,-1.0-2.0*k);
-		gr += (a[k]*t*cos((2.0*k+1.0)*th));
-		gi -= (a[k]*t*sin((2.0*k+1.0)*th));
-	}
-	if (x <= 7.0) {
-		gr1 = 0.0;
-		gi1 = 0.0;
-		for (j=0;j<na;j++) {
-			gr1 += (0.5*log((x+j)*(x+j)+y*y));
-			gi1 += atan(y/(x+j));
-		}
-		gr -= gr1;
-		gi -= gi1;
-	}
-
-
-	if (x1 <= 0.0) {
-		q1 = sqrt(x*x+y*y);
-		th1 = atan(y/x);
-		sr = -sin(M_PI*x)*cosh(M_PI*y);
-		si = -cos(M_PI*x)*sinh(M_PI*y);
-		q2 = sqrt(sr*sr+si*si);
-		th2 = atan(si/sr);
-		if (sr < 0.0) th2 += M_PI;
-		gr = log(M_PI/(q1*q2))-gr;
-		gi = -th1-th2-gi;
-		x = x1;
-		y = y1;
-	}
-
-	if (OPT == 0) {
-		g0 = exp(gr);
-		gr = g0*cos(gi);
-		gi = g0*sin(gi);
-	}
-	g = gr + ui*gi;
-
-	return g;
-}
-
-double DblReggeMod::CHGM(double A, double B, double X) const{
-	double A0=A, A1=A, X0=X, HG = 0.0;
-	double TBA, TB, TA, Y0=0.0, Y1=0.0, RG, LA = (int) A, NL, R, M, INF = pow(10,300);
-	double sum1, sum2, R1, R2, HG1, HG2;
-	if (B == 0.0 || B == -abs( (int) B)){
-		HG = INF;
-	} else if(A == 0.0 || X == 0.0) {
-		HG = 1.0;
-	} else if(A == -1.0){
-		HG = 1.0 - X/B;
-	} else if(A == B){
-		HG = exp(X);
-	} else if (A-B == 1.0){
-		HG = (1.0+X/B)*exp(X);
-	} else if (A == 1.0 && B == 2.0){
-		HG = (exp(X)-1.0)/X;
-	} else if(A == (int)A && A < 0.0){
-		M = (int) -A;
-		R = 1.0;
-		HG = 1.0;
-		for (int k = 1; k<= M ; k++) {
-			R = R*(A+k-1.0)/k/(B+k-1.0)*X;
-			HG+=R;
-		}
-	}
-	if(HG != 0){return HG;}
-
-	if(X<0.0){
-		A = B-A;
-		A0 = A;
-		X = fabs(X);
-	}
-	if(A<2.0) {NL = 0;}
-	else{
-		NL = 1;
-		LA = (int) A;
-		A  = A-LA-1.0;
-	}
-	for (int n = 0; n<= NL; n++) {
-		if(A0 >= 2.0 ) { A+=1.0; }
-		if(X <= 30.0 + fabs(B) || A < 0.0){
-			HG = 1.0;
-			RG = 1.0;
-			for (int j = 1; j<= 500; j++) {
-				RG = RG*(A+j-1)/(j*(B+j-1))*X;
-				HG += RG;
-				if(fabs(RG/HG) < pow(10.,-15.)) {
-					if(n==0) {Y0 = HG;}
-					if(n==1) {Y1 = HG;}
-				}
-				continue;
-			}
-		} else {
-			TA = tgamma(A);
-			TB = tgamma(B);
-			TBA = tgamma(B-A);
-			sum1 = 1.0;
-			sum2 = 1.0;
-			R1 = 1.0;
-			R2 = 1.0;
-			for (int i = 1; i<=8; i++) {
-				R1 = - R1*(A+i-1)*(A-B+i)/(X*i);
-				R2 = - R2*(B-A+i-1)*(A-i)/(X*i);
-				sum1+=R1;
-				sum2+=R2;
-			}
-			HG1 = TB/TBA*pow(X,-A)*cos(M_PI*A)*sum1;
-			HG2 = TB/TA*exp(X)*pow(X,A-B)*sum2;
-			HG = HG1+HG2;
-		}
-		if(n==0) {Y0 = HG;}
-		if(n==1) {Y1 = HG;}
-	}
-	if(A0 >= 2.0){
-		for (int i=1; i<=LA-1; i++) {
-			HG = ((2.*A-B+X)*Y1+(B-A)*Y0)/A;
-			Y0 = Y1;
-			Y1 = HG;
-			A += 1.;
-		}
-	}
-	if(X0<0.0) {HG = HG*exp(X0);}
-	A = A1;
-	X = X0;
-
-	return HG;
-}
 
 void
 DblReggeMod::updatePar( const AmpParameter& par ){
@@ -409,7 +212,7 @@ DblReggeMod::updatePar( const AmpParameter& par ){
 #ifdef GPU_ACCELERATION
 void DblReggeMod::launchGPUKernel( dim3 dimGrid, dim3 dimBlock, GPU_AMP_PROTO ) const{
 
-	GPUDblReggeMod_exec( dimGrid, dimBlock, GPU_AMP_ARGS, S0, b_par, c0,c1,c2,n0,n1,n2, a0,a1,a2,a3,a4, fastParticle, charge);
+	GPUDblReggeMod_exec( dimGrid, dimBlock, GPU_AMP_ARGS, b_par,c0,c1,c2,n0,n1,n2,d10,d11,d12,d20,d21,d22,aPrime,a0 ,S0, fastParticle, charge);
 
 }
 #endif
