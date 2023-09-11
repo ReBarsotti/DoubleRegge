@@ -5,7 +5,7 @@
 
 #include "TLorentzVector.h"
 
-#include "GlueXDataIO/ROOTDataReader.h"
+#include "ROOTDataReader.h"
 #include "IUAmpTools/Kinematics.h"
 
 #include "TH1.h"

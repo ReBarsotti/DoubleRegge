@@ -2,7 +2,7 @@
 #include <vector>
 #include <cassert>
 
-#include "GlueXDataIO/ROOTDataWriter.h"
+#include "ROOTDataWriter.h"
 
 #include "TFile.h"
 #include "TTree.h"
