@@ -1,0 +1,15 @@
+doc/html
+*.a
+*.d
+*.dep
+*.o
+*.so
+*.pcm
+*.DS_Store
+*.SYMDEF*
+*.goutputstream*
+*compiler_flags*
+bin/*
+lib/*
+
+
