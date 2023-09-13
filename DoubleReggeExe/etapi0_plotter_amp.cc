@@ -15,11 +15,11 @@
 #include "AmpPlotter/PlotterMainWindow.h"
 #include "AmpPlotter/PlotFactory.h"
 
-
 #include "DoubleReggePlot/EtaPi0PlotGenerator.h"
 #include "DoubleReggeDataIO/FSRootDataReader.h"
 #include "DoubleReggeDataIO/ROOTDataReader.h"
 #include "DoubleReggeAmp/DblReggeMod.h"
+#include "DoubleReggeAmp/DblRegge30.h"
 //#include "DoubleReggeAmp/DblRegge_FastEta.h"
 //#include "DoubleReggeAmp/DblRegge_FastPi.h"
 //#include "DoubleReggeAmp/Uniform.h"
@@ -32,6 +32,7 @@ void atiSetup(){
 //  AmpToolsInterface::registerAmplitude( dblRegge() );
  // AmpToolsInterface::registerAmplitude( Zlm() );
   AmpToolsInterface::registerAmplitude( DblReggeMod() );  // Modification to go into dblRegge.cc ? Will check...
+  AmpToolsInterface::registerAmplitude( DblRegge30() );
  // AmpToolsInterface::registerAmplitude( Uniform() );  
   //AmpToolsInterface::registerAmplitude( DblRegge_FastEta() ); 
   //AmpToolsInterface::registerAmplitude( DblRegge_FastPi() ); 

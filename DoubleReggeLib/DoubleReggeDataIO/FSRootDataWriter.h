@@ -2,12 +2,11 @@
 #define FSROOTDATAWRITER
 
 #include "IUAmpTools/Kinematics.h"
-#include "DataWriter.h"
 
 #include "TTree.h"
 #include "TFile.h"
 
-class FSRootDataWriter : public DataWriter
+class FSRootDataWriter
 {
 
  public:

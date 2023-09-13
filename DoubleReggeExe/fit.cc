@@ -15,6 +15,7 @@
 //#include "DoubleReggeDataIO/ROOTDataReaderTEM.h"
 #include "DoubleReggeDataIO/FSRootDataReader.h"
 #include "DoubleReggeAmp/DblReggeMod.h"
+#include "DoubleReggeAmp/DblRegge30.h"
 //#include "DoubleReggeAmp/DblRegge_FastEta.h"
 //#include "DoubleReggeAmp/DblRegge_FastPi.h"
 
@@ -290,7 +291,8 @@ int main( int argc, char* argv[] ){
    AmpToolsInterface::registerAmplitude( Uniform() );
 */  
  
-AmpToolsInterface::registerAmplitude( DblReggeMod() );
+   AmpToolsInterface::registerAmplitude( DblReggeMod() );
+   AmpToolsInterface::registerAmplitude( DblRegge30() );
 //AmpToolsInterface::registerAmplitude( DblRegge_FastEta() );
 //AmpToolsInterface::registerAmplitude( DblRegge_FastPi() );
   /* AmpToolsInterface::registerAmplitude( omegapi_amplitude() );

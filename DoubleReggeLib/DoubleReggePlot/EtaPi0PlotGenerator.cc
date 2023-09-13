@@ -10,7 +10,7 @@ EtaPi0PlotGenerator::EtaPi0PlotGenerator( const FitResults& results, Option opt 
 	bookHistogram( khm12, new Histogram1D( 60, 1.0, 3.0, "hm12", "Mass( 1 2 )" ) );
 	bookHistogram( khm13, new Histogram1D( 60, 1.0, 3.0, "hm13", "Mass( 1 3 )" ) );
 	bookHistogram( khm23, new Histogram1D( 60, 1.0, 3.0, "hm23", "Mass( 2 3 )" ) );
-	bookHistogram( kdltz, new Histogram2D( 80, 0.0, 25.0, 80, 0.0, 9.0, "dltz", "Dalitz Plot" ) );
+	bookHistogram( kdltz, new Histogram2D( 100, 3.5, 6.5, 100, 3.5, 6.5, "dltz", "Dalitz Plot;M(#eta#pi);M(#pi p )" ) );
 
 	bookHistogram( eta, new Histogram1D(60, 0.0 , 1.0,"eta", "Mass of #eta" ));
 	bookHistogram( pion, new Histogram1D(60, 0.0 , 1.0,"pion", "Mass of #pi" ));
@@ -66,7 +66,7 @@ void EtaPi0PlotGenerator::projectEvent( Kinematics* kin, const string& reactionN
 	fillHistogram( khm12, (P1+P2).M() );
 	fillHistogram( khm13, (P1+P3).M() );
 	fillHistogram( khm23, (P2+P3).M() );
-	fillHistogram( kdltz, (P1+P2).M2(), (P2+P3).M2() );
+	fillHistogram( kdltz, (P2+P3).M2(), (P1+P3).M2() );
 	fillHistogram( beamE, P0.E());
 
 	TLorentzVector proton = {0,0,0,0};
