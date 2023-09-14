@@ -7,9 +7,9 @@
 EtaPi0PlotGenerator::EtaPi0PlotGenerator( const FitResults& results, Option opt ) :
 	PlotGenerator( results, opt )
 {
-	bookHistogram( khm12, new Histogram1D( 60, 1.0, 3.0, "hm12", "Mass( 1 2 )" ) );
-	bookHistogram( khm13, new Histogram1D( 60, 1.0, 3.0, "hm13", "Mass( 1 3 )" ) );
-	bookHistogram( khm23, new Histogram1D( 60, 1.0, 3.0, "hm23", "Mass( 2 3 )" ) );
+	bookHistogram( khm12, new Histogram1D( 60, 1.0, 4.0, "hm12", "Mass( 1 2 )" ) );
+	bookHistogram( khm13, new Histogram1D( 60, 1.0, 4.0, "hm13", "Mass( 1 3 )" ) );
+	bookHistogram( khm23, new Histogram1D( 60, 1.0, 4.0, "hm23", "Mass( 2 3 )" ) );
 	bookHistogram( kdltz, new Histogram2D( 100, 3.5, 6.5, 100, 3.5, 6.5, "dltz", "Dalitz Plot;M(#eta#pi);M(#pi p )" ) );
 
 	bookHistogram( eta, new Histogram1D(60, 0.0 , 1.0,"eta", "Mass of #eta" ));
