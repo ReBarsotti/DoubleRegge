@@ -11,7 +11,10 @@
 #include "FSRootDataReader.h"
 #include "TSystem.h"
 
+#include "IUAmpTools/report.h"
+
 using namespace std;
+const char* FSRootDataReader::kModule = "FSRootDataReader";
 
 FSRootDataReader::FSRootDataReader( const vector< string >& args ) :
    UserDataReader< FSRootDataReader >(args),
@@ -46,21 +49,21 @@ FSRootDataReader::FSRootDataReader( const vector< string >& args ) :
             m_inTree->AddFriend(friendTreeName, friendFileName);
       }
       else{
-         cout << "FSRootDataReader WARNING:  Cannot find file... " << inFileName << endl;
+	report( ERROR, kModule) << "FSRootDataReader WARNING:  Cannot find file... " << inFileName << endl;
          m_inFile = NULL;
          m_inTree = NULL;
       }
 
       if(args.size()==3)
-        cout << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << endl;
+        report( NOTICE, kModule ) << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << endl;
       if(args.size()==4)
-        cout << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << endl;
+        report( NOTICE, kModule ) << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << endl;
       if(args.size()==5)
-        cout << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << " " << args[4] << endl;
+        report( NOTICE, kModule ) << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << " " << args[4] << endl;
       if(args.size()==6)
-        cout << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << " " << args[4] << " " << args[5] << endl;
+        report( NOTICE, kModule ) << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << " " << args[4] << " " << args[5] << endl;
       if(args.size()==7)
-        cout << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << " " << args[4] << " " << args[5] << " " << args[6] << endl;
+        report( NOTICE, kModule ) << "Opening Tree " << args[0] << " " << args[1] << " " << args[2] << " " << args[3] << " " << args[4] << " " << args[5] << " " << args[6] << endl;
       if (m_inTree){
          TString sEnPB = fourMomentumPrefix+"EnPB";
          TString sPxPB = fourMomentumPrefix+"PxPB";

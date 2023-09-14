@@ -24,14 +24,19 @@
 #include "IUAmpTools/FitResults.h"
 #include "IUAmpTools/ConfigFileParser.h"
 #include "IUAmpTools/ConfigurationInfo.h"
+#include "IUAmpTools/report.h"
 
 using std::complex;
 using namespace std;
 
+string kModule = "fit";
+
 double runSingleFit(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIter, string seedfile) {
   AmpToolsInterface ati( cfgInfo );
 
-  cout << "LIKELIHOOD BEFORE MINIMIZATION:  " << ati.likelihood() << endl;
+
+  double lik = ati.likelihood();
+  report( NOTICE, kModule ) << "LIKELIHOOD BEFORE MINIMIZATION:  " << lik << endl;
 
   MinuitMinimizationManager* fitManager = ati.minuitMinimizationManager();
   fitManager->setMaxIterations(maxIter);
@@ -52,11 +57,12 @@ double runSingleFit(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int m
     ( fitManager->status() != 0 || fitManager->eMatrixStatus() != 3 );
 
   if( fitFailed ){
-    cout << "ERROR: fit failed use results with caution..." << endl;
+    report( ERROR, kModule ) << "ERROR: fit failed use results with caution..." << endl;
     return 1e6;
   }
 
-  cout << "LIKELIHOOD AFTER MINIMIZATION:  " << ati.likelihood() << endl;
+  lik = ati.likelihood();
+  report( NOTICE, kModule ) << "LIKELIHOOD AFTER MINIMIZATION:  " << lik << endl;
 
   ati.finalizeFit();
 
@@ -71,7 +77,8 @@ void runRndFits(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
   AmpToolsInterface ati( cfgInfo );
   string fitName = cfgInfo->fitName();
 
-  cout << "LIKELIHOOD BEFORE MINIMIZATION:  " << ati.likelihood() << endl;
+  double lik = ati.likelihood();
+  report( NOTICE, kModule ) << "LIKELIHOOD BEFORE MINIMIZATION:  " << lik << endl;
 
   MinuitMinimizationManager* fitManager = ati.minuitMinimizationManager();
   fitManager->setMaxIterations(maxIter);
@@ -83,9 +90,9 @@ void runRndFits(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
   int minFitTag = -1;
 
   for(int i=0; i<numRnd; i++) {
-    cout << endl << "###############################" << endl;
-    cout << "FIT " << i << " OF " << numRnd << endl;
-    cout << endl << "###############################" << endl;
+    report( NOTICE, kModule ) << endl << "###############################" << endl;
+    report( NOTICE, kModule ) << "FIT " << i << " OF " << numRnd << endl;
+    report( NOTICE, kModule ) << endl << "###############################" << endl;
 
     // randomize parameters
     ati.randomizeProductionPars(maxFraction);
@@ -104,9 +111,10 @@ void runRndFits(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
     bool fitFailed = (fitManager->status() != 0 || fitManager->eMatrixStatus() != 3);
 
     if( fitFailed )
-      cout << "ERROR: fit failed use results with caution..." << endl;
+      report( ERROR, kModule ) << "ERROR: fit failed use results with caution..." << endl;
 
-    cout << "LIKELIHOOD AFTER MINIMIZATION:  " << ati.likelihood() << endl;
+    lik = ati.likelihood();
+    report( NOTICE, kModule ) << "LIKELIHOOD AFTER MINIMIZATION:  " << lik << endl;
 
     ati.finalizeFit(to_string(i));
 
@@ -123,9 +131,9 @@ void runRndFits(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
   }
 
   // print best fit results
-  if(minFitTag < 0) cout << "ALL FITS FAILED!" << endl;
+  if(minFitTag < 0) report( ERROR, kModule ) << "ALL FITS FAILED!" << endl;
   else {
-    cout << "MINIMUM LIKELIHOOD FROM " << minFitTag << " of " << numRnd << " RANDOM PRODUCTION PARS = " << minLL << endl;
+    report( NOTICE, kModule ) << "MINIMUM LIKELIHOOD FROM " << minFitTag << " of " << numRnd << " RANDOM PRODUCTION PARS = " << minLL << endl;
     gSystem->Exec(Form("cp %s_%d.fit %s.fit", fitName.data(), minFitTag, fitName.data()));
     if( seedfile.size() != 0 )
       gSystem->Exec(Form("cp %s_%d.txt %s.txt", seedfile.data(), minFitTag, seedfile.data()));
@@ -139,7 +147,7 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
   vector< vector<string> > parScanKeywords = cfgInfo->userKeywordArguments("parScan");
 
   if(parScanKeywords.size()==0) {
-    cout << "No parScan keyword found in configuration file. Set up at least one parameter for scanning! Aborting." << endl;
+    report( ERROR, kModule ) << "No parScan keyword found in configuration file. Set up at least one parameter for scanning! Aborting." << endl;
     return;
   } else {
     for(size_t ipar=0; ipar<parScanKeywords.size(); ipar++) {
@@ -150,14 +158,15 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
 	steps = trunc((maxVal-minVal)/stepSize)+1;
 	break;
       } else
-	cout << "Skipping configuration to scan " << parScanKeywords[ipar][0] << "since scanning of " << parScan << " was requested..." << endl;
+	report( NOTICE, kModule ) << "Skipping configuration to scan " << parScanKeywords[ipar][0] << "since scanning of " << parScan << " was requested..." << endl;
     }
   }
 
   AmpToolsInterface ati( cfgInfo );
 
   string fitName = cfgInfo->fitName();
-  cout << "LIKELIHOOD BEFORE MINIMIZATION:  " << ati.likelihood() << endl;
+  double lik = ati.likelihood();
+  report( NOTICE, kModule ) << "LIKELIHOOD BEFORE MINIMIZATION:  " << lik << endl;
 
   ParameterManager* parMgr = ati.parameterManager();
   MinuitMinimizationManager* fitManager = ati.minuitMinimizationManager();
@@ -165,9 +174,12 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
 
 
   for(int i=0; i<steps; i++) {
-    cout << endl << "###############################" << endl;
-    cout << "FIT " << i << " OF " << steps << endl;
-    cout << endl << "###############################" << endl;
+    report( NOTICE, kModule ) << endl << "###############################" << endl;
+    report( NOTICE, kModule ) << "FIT " << i << " OF " << steps << endl;
+    report( NOTICE, kModule ) << endl << "###############################" << endl;
+
+    // reinitialize production parameters from seed file
+    ati.reinitializePars();
 
     // set parameter to be scanned
     vector<ParameterInfo*> parInfoVec = cfgInfo->parameterList();
@@ -178,7 +190,7 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
     }
 
     if( parItr == parInfoVec.end() ){
-      cout << "ERROR:  request to scan nonexistent parameter:  " << parScan << endl;
+      report( ERROR, kModule ) << "ERROR:  request to scan nonexistent parameter:  " << parScan << endl;
       return;
     }
 
@@ -199,9 +211,10 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
     bool fitFailed = (fitManager->status() != 0 || fitManager->eMatrixStatus() != 3);
 
     if( fitFailed )
-      cout << "ERROR: fit failed use results with caution..." << endl;
+      report( ERROR, kModule ) << "ERROR: fit failed use results with caution..." << endl;
 
-    cout << "LIKELIHOOD AFTER MINIMIZATION:  " << ati.likelihood() << endl;
+    lik = ati.likelihood();
+    report( NOTICE, kModule ) << "LIKELIHOOD AFTER MINIMIZATION:  " << lik << endl;
 
     ati.finalizeFit(to_string(i));
 
@@ -249,19 +262,19 @@ int main( int argc, char* argv[] ){
          if ((i+1 == argc) || (argv[i+1][0] == '-')) arg = "-h";
          else  scanPar = argv[++i]; }
       if (arg == "-h"){
-         cout << endl << " Usage for: " << argv[0] << endl << endl;
-         cout << "   -n \t\t\t\t\t use MINOS instead of MIGRAD" << endl;
-         cout << "   -H \t\t\t\t\t evaluate HESSE matrix after minimization" << endl;
-         cout << "   -c <file>\t\t\t\t config file" << endl;
-         cout << "   -s <output file>\t\t\t for seeding next fit based on this fit (optional)" << endl;
-         cout << "   -r <int>\t\t\t Perform <int> fits each seeded with random parameters" << endl;
-         cout << "   -p <parameter> \t\t\t\t Perform a scan of given parameter. Stepsize, min, max are to be set in cfg file" << endl;
-         cout << "   -m <int>\t\t\t Maximum number of fit iterations" << endl; 
+         report( ERROR, kModule ) << endl << " Usage for: " << argv[0] << endl << endl;
+         report( ERROR, kModule ) << "   -n \t\t\t\t\t use MINOS instead of MIGRAD" << endl;
+         report( ERROR, kModule ) << "   -H \t\t\t\t\t evaluate HESSE matrix after minimization" << endl;
+         report( ERROR, kModule ) << "   -c <file>\t\t\t\t config file" << endl;
+         report( ERROR, kModule ) << "   -s <output file>\t\t\t for seeding next fit based on this fit (optional)" << endl;
+         report( ERROR, kModule ) << "   -r <int>\t\t\t Perform <int> fits each seeded with random parameters" << endl;
+         report( ERROR, kModule ) << "   -p <parameter> \t\t\t\t Perform a scan of given parameter. Stepsize, min, max are to be set in cfg file" << endl;
+         report( ERROR, kModule ) << "   -m <int>\t\t\t Maximum number of fit iterations" << endl; 
          exit(1);}
    }
 
    if (configfile.size() == 0){
-      cout << "No config file specified" << endl;
+      report( ERROR, kModule ) << "No config file specified" << endl;
             exit(1);
    }
 
