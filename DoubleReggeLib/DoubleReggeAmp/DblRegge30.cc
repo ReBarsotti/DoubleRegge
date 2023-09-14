@@ -63,9 +63,7 @@ DblRegge30::calcAmplitude( GDouble** pKin, GDouble* userVars ) const {
 
   double alpha1 = m_aPrime*u[k_t1] + m_a0;
   double alpha2 = m_aPrime*u[k_t]  + m_a0;
-
-  alpha2 = ( alpha2 < 0 ? 0 : alpha2 );
-
+  
   double v1 = m_d10 + m_d11*u[k_s1] + m_d12*u[k_s2];
   double v2 = m_d20 + m_d21*u[k_s1] + m_d22*u[k_s2];
 
@@ -85,16 +83,30 @@ DblRegge30::calcAmplitude( GDouble** pKin, GDouble* userVars ) const {
 		      m_n1*m_n1*exp( m_c1*m_c1*u[k_t] )*fabs(u[k_t]) +  // fabs to keep this term positive
 		      m_n2*m_n2*exp( m_c2*m_c2*u[k_t] )*u[k_t]*u[k_t] );
 
-  return ( ss2*xi1*xi21*v1 + ss1*xi2*xi12*v2 )*tDep;
+  // careful here!!  if you decide to float a0 or a0Prime in the fit then
+  // these precalculated values cannot be used
+  complex<double> gam1( u[k_gam1_re], u[k_gam1_im] );
+  complex<double> gam2( u[k_gam2_re], u[k_gam2_im] );
+
+  //  these two lines would be appropriate if a0 and/or a0Prime and hence
+  //  the values of alpha are floating in the fit...
+  // complex< double > gam1 = cgamma( -alpha1 );
+  // complex< double > gam2 = cgamma( -alpha2 );
+
+  double angles = sin( u[k_phiGJ] ) * sin( u[k_thetaGJ] ) * sin( u[k_thetaCM] );
+  
+  return ( gam1*ss2*xi1*xi21*v1 + gam2*ss1*xi2*xi12*v2 )*tDep*angles;
 }
 
-void DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const{
+void
+DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const {
   
   TLorentzVector beam   ( pKin[0][1], pKin[0][2], pKin[0][3], pKin[0][0] );
+  TLorentzVector target (          0,          0,          0,      0.938 );
   TLorentzVector proton ( pKin[1][1], pKin[1][2], pKin[1][3], pKin[1][0] );
   TLorentzVector eta    ( pKin[2][1], pKin[2][2], pKin[2][3], pKin[2][0] );
   TLorentzVector pi     ( pKin[3][1], pKin[3][2], pKin[3][3], pKin[3][0] );
-
+  
   userVars[k_s]  = ( proton + eta + pi ).M2();
   userVars[k_s1] = ( eta + pi ).M2();
   userVars[k_t]  = ( eta + pi - beam ).M2();
@@ -102,4 +114,124 @@ void DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const{
   // m_fastParticle is set to 2 for eta and 3 for pi
   userVars[k_s2] = ( m_fastParticle == 2 ? ( proton + pi ).M2() : ( proton + eta ).M2() );
   userVars[k_t1] = ( m_fastParticle == 2 ? ( eta - beam ).M2()  : ( pi - beam ).M2()    );
+
+  // get the scattering angle
+  TLorentzRotation cmBoost = -( target + beam ).BoostVector();
+  TLorentzVector protonCM = cmBoost * proton;
+  userVars[k_thetaCM] = acos( fabs( protonCM.CosTheta() ) );
+  
+  // now boost to the GJ frame -- everything about is frame invaraint anyway...
+  TLorentzVector etaPi = eta + pi;
+  eta.Boost( -1 * etaPi.BoostVector() );
+  beam.Boost( -1 * etaPi.BoostVector() );
+  proton.Boost( -1 * etaPi.BoostVector() );
+
+  TVector3 z = beam.Vect().Unit();
+  TVector3 y = (beam.Vect().Unit().Cross(proton.Vect().Unit())).Unit();
+  TVector3 x = y.Cross(z);
+
+  TVector3 angles( (eta.Vect()).Dot(x),
+		   (eta.Vect()).Dot(y),
+		   (eta.Vect()).Dot(z) );
+
+  userVars[k_phiGJ] = angles.Phi();
+  userVars[k_thetaGJ] = angles.Theta();
+
+  // the gamma functions are expensive -- as long as aPrime and a0
+  // aren't varying, then we can cache them
+  double alpha1 =  m_aPrime*userVars[k_t1] + m_a0;
+  double alpha2 =  m_aPrime*userVars[k_t]  + m_a0;
+
+  complex< double > gam1 = cgamma( -alpha1 );
+  complex< double > gam2 = cgamma( -alpha2 );
+  
+  userVars[k_gam1_re] = real( gam1 );
+  userVars[k_gam1_im] = imag( gam1 );
+
+  userVars[k_gam2_re] = real( gam2 );
+  userVars[k_gam2_re] = imag( gam2 );
+}
+
+
+complex<double>
+DblRegge30::cgamma( complex<double> z ) const {
+
+  complex<double> ui (0,1);
+  complex<double> g, infini= 1e308+ 0.0*ui; // z0,z1
+  double x0,q1,q2,x,y,th,th1,th2,g0,gr,gi,gr1,gi1;
+  double na=0.0,t,x1 = 1,y1=0.0,sr,si;
+  int j,k;
+
+
+  static double a[] = {
+    8.333333333333333e-02,
+    -2.777777777777778e-03,
+    7.936507936507937e-04,
+    -5.952380952380952e-04,
+    8.417508417508418e-04,
+    -1.917526917526918e-03,
+    6.410256410256410e-03,
+    -2.955065359477124e-02,
+    1.796443723688307e-01,
+    -1.39243221690590};
+
+  x = real(z);
+  y = imag(z);
+
+  if (x > 171) return infini;
+  if ((y == 0.0) && (x == (int)x) && (x <= 0.0))
+    return infini;
+  else if (x < 0.0) {
+    x1 = x;
+    y1 = y;
+    x = -x;
+    y = -y;
+  }
+  x0 = x;
+  if (x <= 7.0) {
+    na = (int)(7.0-x);
+    x0 = x+na;
+  }
+  q1 = sqrt(x0*x0+y*y);
+  th = atan(y/x0);
+  gr = (x0-0.5)*log(q1)-th*y-x0+0.5*log(2.0*M_PI);
+  gi = th*(x0-0.5)+y*log(q1)-y;
+  for (k=0;k<10;k++){
+    t = pow(q1,-1.0-2.0*k);
+    gr += (a[k]*t*cos((2.0*k+1.0)*th));
+    gi -= (a[k]*t*sin((2.0*k+1.0)*th));
+  }
+  if (x <= 7.0) {
+    gr1 = 0.0;
+    gi1 = 0.0;
+    for (j=0;j<na;j++) {
+      gr1 += (0.5*log((x+j)*(x+j)+y*y));
+      gi1 += atan(y/(x+j));
+    }
+    gr -= gr1;
+    gi -= gi1;
+  }
+
+
+  if (x1 <= 0.0) {
+    q1 = sqrt(x*x+y*y);
+    th1 = atan(y/x);
+    sr = -sin(M_PI*x)*cosh(M_PI*y);
+    si = -cos(M_PI*x)*sinh(M_PI*y);
+    q2 = sqrt(sr*sr+si*si);
+    th2 = atan(si/sr);
+    if (sr < 0.0) th2 += M_PI;
+    gr = log(M_PI/(q1*q2))-gr;
+    gi = -th1-th2-gi;
+    x = x1;
+    y = y1;
+  }
+
+  g0 = exp(gr);
+  gr = g0*cos(gi);
+  gi = g0*sin(gi);
+  
+  g = gr + ui*gi;
+
+  return g;
 }

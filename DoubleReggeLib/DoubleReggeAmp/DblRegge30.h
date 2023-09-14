@@ -27,7 +27,8 @@ class DblRegge30 : public UserAmplitude< DblRegge30 >
 
   string name() const { return "DblRegge30"; }
 
-  enum UserVars { k_s = 0, k_s1, k_s2, k_t1, k_t, kNumUserVars };     
+  enum UserVars { k_s = 0, k_s1, k_s2, k_t1, k_t, k_phiGJ, k_thetaGJ, k_thetaCM,
+		  k_gam1_re, k_gam1_im, k_gam2_re, k_gam2_im, kNumUserVars };     
   unsigned int numUserVars() const {return kNumUserVars; }
    
   complex< GDouble > calcAmplitude( GDouble** pKin, GDouble* userVars ) const;
@@ -43,6 +44,8 @@ class DblRegge30 : public UserAmplitude< DblRegge30 >
 
  private:
 
+  complex<double> cgamma( complex<double> z ) const;
+  
   int m_j;
   int m_fastParticle; //2 for eta, 3 for pion
   int m_charge; // 0 for neutral, 1 for charged
