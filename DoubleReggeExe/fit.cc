@@ -164,6 +164,11 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
 
   AmpToolsInterface ati( cfgInfo );
 
+  // this is needed because if the user vars depend on fixed
+  // parameters that being scanned (unusual, but not impossible)
+  // then they should be recomputed
+  ati.forceUserVarRecalculation( true );
+  
   string fitName = cfgInfo->fitName();
   double lik = ati.likelihood();
   report( NOTICE, kModule ) << "LIKELIHOOD BEFORE MINIMIZATION:  " << lik << endl;
@@ -197,9 +202,9 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
     // set and fix parameter for scan
     double value = minVal + i*stepSize;
     parMgr->setAmpParameter( parScan, value );
-
+    
     cfgInfo->setFitName(fitName + "_scan");
-
+      
     if(useMinos)
       fitManager->minosMinimization();
     else
@@ -207,7 +212,7 @@ void runParScan(ConfigurationInfo* cfgInfo, bool useMinos, bool hesse, int maxIt
 
     if(hesse)
        fitManager->hesseEvaluation();
-
+    
     bool fitFailed = (fitManager->status() != 0 || fitManager->eMatrixStatus() != 3);
 
     if( fitFailed )
