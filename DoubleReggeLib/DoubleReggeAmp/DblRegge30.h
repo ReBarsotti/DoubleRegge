@@ -37,6 +37,8 @@ class DblRegge30 : public UserAmplitude< DblRegge30 >
   bool needsUserVarsOnly() const { return true; }
   bool areUserVarsStatic() const { return false; }
 
+  void updatePar( const AmpParameter& par );
+  
 #ifdef GPU_ACCELERATION
   void launchGPUKernel ( dim3 dimGrid, dim3 dimBlock, GPU_AMP_PROTO ) const;
   bool isGPUEnabled() const { return false; }
@@ -51,6 +53,8 @@ class DblRegge30 : public UserAmplitude< DblRegge30 >
   int m_charge; // 0 for neutral, 1 for charged
   AmpParameter m_b_par, m_c0, m_c1, m_c2, m_n0, m_n1, m_n2, m_d10, m_d11, m_d12, m_d20, m_d21, m_d22, m_aPrime, m_a0;
   AmpParameter m_s0;
+
+  static const char* kModule;
 };
 
 #endif

@@ -9,8 +9,11 @@
 #include "TLorentzRotation.h"
 
 #include "IUAmpTools/Kinematics.h"
+#include "IUAmpTools/report.h"
+
 #include "DblRegge30.h"
 
+const char* DblRegge30::kModule = "DblRegge30";
 
 DblRegge30::DblRegge30( const vector< string >& args ) :
   UserAmplitude< DblRegge30 >( args )
@@ -90,12 +93,22 @@ DblRegge30::calcAmplitude( GDouble** pKin, GDouble* userVars ) const {
 
   //  these two lines would be appropriate if a0 and/or a0Prime and hence
   //  the values of alpha are floating in the fit...
-  // complex< double > gam1 = cgamma( -alpha1 );
-  // complex< double > gam2 = cgamma( -alpha2 );
+  //  complex< double > gam1 = cgamma( -alpha1 );
+  //  complex< double > gam2 = cgamma( -alpha2 );
 
   double angles = sin( u[k_phiGJ] ) * sin( u[k_thetaGJ] ) * sin( u[k_thetaCM] );
   
   return ( gam1*ss2*xi1*xi21*v1 + gam2*ss1*xi2*xi12*v2 )*tDep*angles;
+}
+
+void
+DblRegge30::updatePar( const AmpParameter& par ) {
+
+  if( par == m_a0 || par == m_aPrime ){
+  
+    report( DEBUG, kModule ) << "in updatePar(): a0, aPrime = "
+			     << m_a0 << ", " << m_aPrime << endl;
+  }
 }
 
 void
