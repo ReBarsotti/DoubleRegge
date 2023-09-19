@@ -96,7 +96,7 @@ DblRegge30::calcAmplitude( GDouble** pKin, GDouble* userVars ) const {
   //  complex< double > gam1 = cgamma( -alpha1 );
   //  complex< double > gam2 = cgamma( -alpha2 );
 
-  double angles = sin( u[k_phiGJ] ) * sin( u[k_thetaGJ] ) * sin( u[k_thetaCM] );
+  double angles = sin( u[k_thetaGJ] ) * sin( u[k_thetaCM] );
   
   return ( gam1*ss2*xi1*xi21*v1 + gam2*ss1*xi2*xi12*v2 )*tDep*angles;
 }
