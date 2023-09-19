@@ -81,12 +81,6 @@ int main( int argc, char* argv[] ){
   atiSetup();  
   PlotGen plotGen( results, option );
 
-    // ************************
-    // start the GUI
-    // ************************
-
-  cout << ">> Plot generator ready, starting GUI..." << endl;
-
   int dummy_argc = 0;
   char* dummy_argv[] = {};  
   TApplication app( "app", &dummy_argc, dummy_argv );
@@ -101,7 +95,13 @@ int main( int argc, char* argv[] ){
   
   PlotFactory factory( plotGen );	
   PlotterMainWindow mainFrame( gClient->GetRoot(), factory );
-	
+
+  // ************************
+  // start the GUI
+  // ************************
+
+  cout << ">> Plot generator ready, starting GUI..." << endl;
+
   app.Run();
     
   return 0;
