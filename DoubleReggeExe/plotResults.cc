@@ -79,7 +79,7 @@ int main( int argc, char* argv[] ){
   plotGenerator.enableReaction( reactionName );
   vector<string> amps = plotGenerator.uniqueAmplitudes();
 
-  for (unsigned int iamp = 0; iamp <= amps.size(); iamp++){
+  for (unsigned int iamp = 0; iamp < amps.size(); iamp++){
     
     plotGenerator.enableAmp(iamp);
   }
