@@ -197,7 +197,7 @@ DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const {
 	userVars[k_gam1_im] = imag( gam1 );
 
 	userVars[k_gam2_re] = real( gam2 );
-	userVars[k_gam2_re] = imag( gam2 );
+	userVars[k_gam2_im] = imag( gam2 );
 }
 
 
