@@ -33,10 +33,10 @@ DblRegge30::DblRegge30( const vector< string >& args ) :
 	m_d20 = AmpParameter( args[10] );
 	m_d21 = AmpParameter( args[11] );
 	m_d22 = AmpParameter( args[12] );	
-	m_aPrime = AmpParameter( args[13] );
-	m_aPrime_2 = AmpParameter( args[14] );
-	m_a0 = AmpParameter( args[15] );
-	m_a0_2 = AmpParameter( args[16] );
+	m_a0 = AmpParameter( args[13] );
+	m_a0_2 = AmpParameter( args[14] );
+	m_aPrime = AmpParameter( args[15] );
+	m_aPrime_2 = AmpParameter( args[16] );
 	m_s0 = AmpParameter( args[17] );
 	m_fastParticle = atoi( args[18].c_str() );
 	m_charge = atoi( args[19].c_str() );
