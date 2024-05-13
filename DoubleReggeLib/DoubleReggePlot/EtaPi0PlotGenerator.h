@@ -15,7 +15,7 @@ public:
 	
 
   enum {
-    khm12 = 0, khm13, khm23, kdltz, cosT, phiAng, PhiT, cosT_m23, Omega, cosT_phi, cosT_Phi, cosT_lab, phiAng_lab, cosT_m23_lab, phi_m23_lab, t1, t2, s12, s13, s23, u3,eta,cosT_cm, pion,recoil, beamE,
+    khm12 = 0, khm13, khm23, kdltz, cosT, phiAng, PhiT, cosT_m23, Omega, cosT_phi, cosT_Phi, cosT_lab, phiAng_lab, cosT_m23_lab, phi_m23_lab, t_eta, t_pi,t2, s12, s13, s, s23,eta,cosT_cm, pion,recoil, beamE,phi_s23,phi_s12,phi_s13,
     kNumHists
   };
 

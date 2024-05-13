@@ -7,9 +7,9 @@
 EtaPi0PlotGenerator::EtaPi0PlotGenerator( const FitResults& results, Option opt ) :
 	PlotGenerator( results, opt )
 {
-	bookHistogram( khm12, new Histogram1D( 60, 1.0, 4.0, "hm12", "Mass( 1 2 )" ) );
-	bookHistogram( khm13, new Histogram1D( 60, 1.0, 4.0, "hm13", "Mass( 1 3 )" ) );
-	bookHistogram( khm23, new Histogram1D( 60, 1.0, 4.0, "hm23", "Mass( 2 3 )" ) );
+	bookHistogram( khm12, new Histogram1D( 60, 1.0, 4.0, "hm12", "Mass( p #eta )" ) );
+	bookHistogram( khm13, new Histogram1D( 60, 1.0, 4.0, "hm13", "Mass( p #pi )" ) );
+	bookHistogram( khm23, new Histogram1D( 60, 1.0, 4.0, "hm23", "Mass( #eta #pi )" ) );
 	bookHistogram( kdltz, new Histogram2D( 100, 3.5, 6.5, 100, 3.5, 6.5, "dltz", "Dalitz Plot;M(#eta#pi);M(#pi p )" ) );
 
 	bookHistogram( eta, new Histogram1D(60, 0.0 , 1.0,"eta", "Mass of #eta" ));
@@ -17,16 +17,21 @@ EtaPi0PlotGenerator::EtaPi0PlotGenerator( const FitResults& results, Option opt 
 	bookHistogram( recoil, new Histogram1D(60, 0.0 , 1.0,"recoil", "Mass of recoil" ));
 
 
-	bookHistogram( s12, new Histogram1D(100, 0., 14., "s12", "S(1 2) (Vincent's notation)") );
-	bookHistogram( s13, new Histogram1D(100, 0., 14., "s13", "S(1 3) (Vincent's notation)") );
-	bookHistogram( s23, new Histogram1D(100, 0., 14., "s23", "S(2 3) (Vincent's notation)") );
-	bookHistogram( t1, new Histogram1D(60, -10., 1., "t1", "t1 (Vincent's notation)"));
-	bookHistogram( t2, new Histogram1D(60, -10., 1., "t2", "t2 (Vincent's notation)"));
-	bookHistogram( u3, new Histogram1D(60, -6., 1., "u3", "u3"));
-	bookHistogram(beamE, new Histogram1D(60,8.0, 9.0, "beamE", "Beam Energy"));
+	bookHistogram( s, new Histogram1D(100, 15., 25., "s", "s_{#gamma p}") );
+	bookHistogram( s12, new Histogram1D(100, 0., 14., "s12", "s_{#eta #pi}") );
+	bookHistogram( s13, new Histogram1D(100, 0., 14., "s13", "s_{#eta p}") );
+	bookHistogram( s23, new Histogram1D(100, 0., 14., "s23", "s_{#pi p}") );
+	bookHistogram( t_eta, new Histogram1D(60, -10., 0., "t_eta", "t_{#eta}"));
+	bookHistogram( t_pi, new Histogram1D(60, -10., 0., "t_pi", "t_{#pi}"));
+	bookHistogram( t2, new Histogram1D(60, -6., 0., "u3", "t_{2}"));
+	bookHistogram(beamE, new Histogram1D(60,8.0, 9.0, "beamE", "E_{#gamma}"));
 
-	bookHistogram( cosT, new Histogram1D( 60, -1.1, 1.1, "cosT", "CosTheta") );
-	bookHistogram( phiAng, new Histogram1D(40, -3.2, 3.2, "phiAng", "#phi") );
+	bookHistogram( phi_s12, new Histogram2D(70,2,11,70,-3.2,3.2,"phi_s12", "#phi_{GJ} vs s_{12}"));
+	bookHistogram( phi_s13, new Histogram2D(70,3,12.,70,-3.2,3.2,"phi_s13", "#phi_{GJ} vs s_{13}"));
+	bookHistogram( phi_s23, new Histogram2D(70,3,10,70,-3.2,3.2,"phi_s23", "#phi_{GJ} vs s_{23}"));
+
+	bookHistogram( cosT, new Histogram1D( 60, -1.1, 1.1, "cosT", "cos(#theta_{GJ})") );
+	bookHistogram( phiAng, new Histogram1D(40, -3.2, 3.2, "phiAng", "#phi_{GJ}") );
 	bookHistogram( cosT_lab, new Histogram1D( 60, -1.1, 1.1, "cosT_lab", "CosThetaLab") );
 	bookHistogram( cosT_cm, new Histogram1D( 60, -1.1, 1.1, "cosT_cm", "CosThetaCM") );
 	bookHistogram( phiAng_lab, new Histogram1D(40, -3.2, 3.2, "phiAng_lab", "#phi_{lab}") );
@@ -72,18 +77,19 @@ void EtaPi0PlotGenerator::projectEvent( Kinematics* kin, const string& reactionN
 	TLorentzVector proton = {0,0,0,0};
 	proton.SetE(.93827231);
 
-	fillHistogram(u3, (proton - P1).M2() );
+	fillHistogram( s, (P0+proton).M2() );
+	fillHistogram(t2, (proton - P1).M2() );
 
 
 	fillHistogram( s12, (P2 + P3).M2() );
 	fillHistogram( s23, (P3 + P1).M2() );
 	fillHistogram( s13, (P2 + P1).M2() );
-	fillHistogram( t1, (P0 - P2).M2() );
-	fillHistogram( t2, (P0 - P3).M2() );
+	fillHistogram( t_eta, (P0 - P2).M2() );
+	fillHistogram( t_pi, (P0 - P3).M2() );
 
 
 //MODEL TESTING CODE, COMMENT OUT FOR REGULAR USE
-
+/*
 s1 = (P2+P3).M();
 s2 = (P3+P1).M2();
 teta = (P0-P2).M();
@@ -94,7 +100,7 @@ if((s1<=2.6 && s1>=2.5) && (teta>= 0.36 && teta<= 0.49) && (tpi>= 16.3 && tpi<=1
         fillHistogram( s23, (P3 + P1).M2() );
 
 } 
-
+*/
 //END OF MODEL TESTING CODE	
 
 
@@ -159,4 +165,7 @@ if((s1<=2.6 && s1>=2.5) && (teta>= 0.36 && teta<= 0.49) && (tpi>= 16.3 && tpi<=1
 	fillHistogram( cosT_m23, (P2+P3).M(), cosTheta);
 	fillHistogram( cosT_phi, phi, cosTheta);
 	fillHistogram( cosT_Phi, Phi, cosTheta);
+	fillHistogram( phi_s12, (P2+P3).M2(), phi);
+	fillHistogram( phi_s13, (P2+P1).M2(), phi);
+	fillHistogram( phi_s23, (P1+P3).M2(),phi);
 }
