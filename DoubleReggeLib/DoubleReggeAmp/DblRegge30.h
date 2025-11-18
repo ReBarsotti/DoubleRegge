@@ -27,12 +27,13 @@ class DblRegge30 : public UserAmplitude< DblRegge30 >
 
   string name() const { return "DblRegge30"; }
 
-  enum UserVars { k_s = 0, k_s1, k_s2, k_t1, k_t2, k_tmin, k_phiGJ, k_thetaGJ, k_thetaCM,
+  enum UserVars { k_s = 0, k_s1, k_s2, k_t1, k_t, k_tmin, k_phiGJ, k_thetaGJ, k_thetaCM,k_pi,
 		  k_gam1_re, k_gam1_im, k_gam2_re, k_gam2_im, kNumUserVars };     
   unsigned int numUserVars() const {return kNumUserVars; }
    
   complex< GDouble > calcAmplitude( GDouble** pKin, GDouble* userVars ) const;
   void calcUserVars( GDouble** pKin, GDouble* userVars ) const;
+  double CHGM(double A, double B, double X) const;
 
   bool needsUserVarsOnly() const { return true; }
   bool areUserVarsStatic() const { return false; }
@@ -47,9 +48,12 @@ class DblRegge30 : public UserAmplitude< DblRegge30 >
  private:
 
   complex<double> cgamma( complex<double> z ) const;
+  
+  int m_j;
   int m_fastParticle; //2 for eta, 3 for pion
-  AmpParameter m_c0, m_c1, m_c2, m_c3, m_d1, m_d2, m_aPrime, m_a0,m_aPrime_2,m_a0_2,m_f0,m_f1,m_f2, m_g0,m_g1,m_g2,m_g3,m_f3,m_f4,m_f5;
-  AmpParameter m_s0;
+  int m_charge; // 0 for neutral, 1 for charged
+  AmpParameter  m_c0, m_c1, m_c2,m_d0, m_d1, m_d2, m_aPrime, m_a0,m_aPrime_2,m_a0_2,m_d3,m_c3;
+  AmpParameter m_s0,m_b;
 
   static const char* kModule;
 };
