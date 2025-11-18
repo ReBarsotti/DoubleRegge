@@ -144,8 +144,6 @@ DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const {
 	userVars[k_phiGJ] = angles.Phi();
 	userVars[k_thetaGJ] = angles.Theta();
 
-	// the gamma functions are expensive -- as long as aPrime and a0
-	// aren't varying, then we can cache them
 	double alpha1 =  m_aPrime*m_aPrime*userVars[k_t1] + m_a0;
 	double alpha2 =  m_aPrime_2*m_aPrime_2*userVars[k_t]  + m_a0_2;
 
