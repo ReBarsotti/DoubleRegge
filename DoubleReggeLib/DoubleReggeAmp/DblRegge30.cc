@@ -18,56 +18,37 @@ const char* DblRegge30::kModule = "DblRegge30";
 DblRegge30::DblRegge30( const vector< string >& args ) :
 	UserAmplitude< DblRegge30 >( args )
 {       
-	assert( args.size() == 22 );
-
-	m_f0 = AmpParameter(args[0]);
-	m_f1 = AmpParameter(args[1]);
-	m_f2 = AmpParameter(args[2]);
-	m_f3 = AmpParameter(args[3]);
-	m_f4 = AmpParameter(args[4]);
-	m_f5 = AmpParameter(args[5]);
-	m_c0 = AmpParameter( args[6]);
-	m_c1 = AmpParameter( args[7]);
-	m_c2 = AmpParameter( args[8]);
-	m_c3 = AmpParameter( args[9]);
-	m_g0 = AmpParameter( args[10]);
-	m_g1 = AmpParameter( args[11]);
-	m_g2 = AmpParameter( args[12]);
-	m_g3 = AmpParameter( args[13]);
-	m_d1 = AmpParameter(args[14]);
-	m_d2 = AmpParameter( args[15] );
-	m_a0 = AmpParameter( args[16] );
-	m_a0_2 = AmpParameter( args[17] );	
-	m_aPrime = AmpParameter( args[18] );
-	m_aPrime_2 = AmpParameter( args[19] );
-	m_s0 = AmpParameter( args[20] );
-	m_fastParticle = atoi( args[21].c_str() );
+	assert( args.size() == 14 );
+	
+	m_c0 = AmpParameter(args[0]);
+	m_c1 = AmpParameter(args[1]);
+	m_c2 = AmpParameter(args[2]);
+	m_c3 = AmpParameter(args[3]);
+	m_d0 = AmpParameter(args[4]);
+	m_d1 = AmpParameter(args[5]);
+	m_d2 = AmpParameter(args[6]);
+	m_d3 = AmpParameter(args[7]);
+	m_a0 = AmpParameter( args[8] );
+	m_a0_2 = AmpParameter( args[9] );
+	m_aPrime = AmpParameter( args[10] );
+	m_aPrime_2 = AmpParameter( args[11] );
+	m_s0 = AmpParameter( args[12] );
+	m_fastParticle = atoi( args[13].c_str() );
 
 
-	registerParameter( m_f0 );
-	registerParameter( m_f1 );
-	registerParameter( m_f2 );
-	registerParameter( m_f3 );
-	registerParameter( m_f4 );
-	registerParameter( m_f5 );
-	registerParameter( m_c0 );
-	registerParameter( m_c1 );
-	registerParameter( m_c2 );
-	registerParameter( m_c3 );
-
-	registerParameter( m_g0 );
-	registerParameter( m_g1 );
-	registerParameter( m_g2 );
-	registerParameter( m_g3 );
-	registerParameter( m_d1 );
-	registerParameter( m_d2);
+	registerParameter(m_c0);
+	registerParameter(m_c1);
+	registerParameter(m_c2);
+	registerParameter(m_c3);
+	registerParameter(m_d0);
+	registerParameter(m_d1);
+	registerParameter(m_d2);
+	registerParameter(m_d3);
 	registerParameter( m_aPrime );
 	registerParameter( m_aPrime_2 );
 	registerParameter( m_a0 );
 	registerParameter( m_a0_2 );
 	registerParameter( m_s0 );
-	
-
 }
 
 complex< GDouble >
@@ -78,43 +59,70 @@ DblRegge30::calcAmplitude( GDouble** pKin, GDouble* userVars ) const {
 	complex<double> i(0,1);
 
 
+	double alpha1 = m_aPrime*m_aPrime*u[k_t1] + m_a0;
+	double alpha2 = m_aPrime_2*m_aPrime_2*u[k_t]  + m_a0_2;
 
-	double alpha1 = m_aPrime*u[k_t1] + m_a0;
-	double alpha2 = m_aPrime_2*u[k_t2] + m_a0_2;
 
-	complex<double> xfunc = (m_c0 + m_c1*u[k_t1] + m_c2*u[k_t1]*u[k_t1])*exp(m_c3*m_c3*u[k_t1]);
-	complex<double> yfunc = (m_g0 + m_g1*u[k_t2] + m_g2*u[k_t2]*u[k_t2])*exp(m_g3*m_g3*u[k_t2]);
+//	complex< double > gam1 = cgamma( -alpha1 );
+//	complex< double > gam2 = cgamma( -alpha2 );
+
+	double eta = m_s0*u[k_s] / (u[k_s2]*u[k_s1]);
+
+
+
+//	complex< double > v1 = (cgamma(alpha1-alpha2)/gam2)*CHGM(-alpha1 , 1-alpha1+alpha2,-1./eta);
+//	complex< double > v2 =( cgamma(alpha2-alpha1)/gam1)*CHGM(-alpha2 , 1-alpha2+alpha1, -1./eta);
+
+	complex< double> v1 = (m_c0 + m_c1*(1./eta) + m_c2*(1./eta)*(1./eta) + m_c3*(1./eta)*(1./eta)*(1./eta));
+	complex< double> v2 = (m_d0 + m_d1*(1./eta) + m_d2*(1./eta)*(1./eta) + m_d3*(1./eta)*(1./eta)*(1./eta));
+
+//	complex< double> v1 = 1 + m_c0*cos(u[k_phiGJ]);
+//	complex< double> v2 = 1 + m_d0*cos(u[k_phiGJ]);
+
+	complex<double> xi1   = ( complex<double>( -1, 0 ) + exp( -i*M_PI*alpha1 ) ) / 2.;
+	complex<double> xi2   = ( complex<double>( -1, 0 ) + exp( -i*M_PI*alpha2 ) ) / 2.;
+	complex<double> xi12  = ( complex<double>(  1, 0 ) + exp( -i*M_PI*(alpha1-alpha2) ) ) / 2.;
+	complex<double> xi21  = ( complex<double>(  1, 0 ) + exp( -i*M_PI*(alpha2-alpha1) ) ) / 2.;
 
 
 	complex<double> ss2 = pow( u[k_s]/m_s0, alpha1 ) * pow( u[k_s2]/m_s0, alpha2-alpha1 );
 	complex<double> ss1 = pow( u[k_s]/m_s0, alpha2 ) * pow( u[k_s1]/m_s0, alpha1-alpha2 );
 
+	double barrier = sqrt(-u[k_t1]); //*(1+m_c0*cos(u[k_phiGJ]));
+
+	// this is the t dependence of the cross section -- we'll multiply the
+	// amplitude by the sqrt of this since it the amplitude is squared in
+	// in the intensity -- note the arguments of the exponentials are always
+	// negative and the expreission os contructed to be strictly positive
+
+
 	// careful here!!  if you decide to float a0 or a0Prime in the fit then
 	// these precalculated values cannot be used
 	//complex<double> gam1( u[k_gam1_re], u[k_gam1_im] );
-	//complex<double> gam2( u[k_gam2_re], u[k_gam2_im] );
+	//	complex<double> gam2( u[k_gam2_re], u[k_gam2_im] );
+
 	//  these two lines would be appropriate if a0 and/or a0Prime and hence
 	//  the values of alpha are floating in the fit...
-	//	complex< double > gam1 = cgamma( -alpha1 );
-	//	complex< double > gam2 = cgamma( -alpha2 );
-	double spinFactor =  sin( u[k_thetaGJ] );
-	double MASSPI2 = 0.01948;
-	double phi_approx = (u[k_t1]+ u[k_t2] - MASSPI2 + (u[k_s2]*u[k_s1]/u[k_s])) / (2*sqrt(-u[k_t1])*sqrt(-u[k_t2])); 
 
-	//	double angles = sqrt(u[k_s]*u[k_s]*(-u[k_t1])*sin(u[k_phiGJ])*sin(u[k_phiGJ]));
-	double explicitAngle = 1 + m_f0*cos( u[k_phiGJ] ) + m_f1*cos( u[k_phiGJ])*cos( u[k_phiGJ]) + m_f2*cos(u[k_phiGJ])*cos(u[k_phiGJ])*cos( u[k_phiGJ]);
-	//double explicitAngle = 1+ m_f0*phi_approx + m_f1*phi_approx*phi_approx + m_f2 * phi_approx*phi_approx*phi_approx;
 
-	double explicitAngle2 =  1 +m_f3*cos( u[k_phiGJ] ) + m_f4*cos( u[k_phiGJ])*cos( u[k_phiGJ]) + m_f5*cos(u[k_phiGJ])*cos(u[k_phiGJ])*cos( u[k_phiGJ]);
-	double v1 = m_d1;
-	double v2 = m_d2;
-	//double spinFactor =  u[k_s]*u[k_s1]*sqrt(abs((u[k_t1] - u[k_tmin] )));  
-	//	double spinFactor= 1 + m_d22*cos(u[k_phiGJ]);
-	return ( ss2*xfunc*v1*explicitAngle +yfunc*ss1*v2*explicitAngle2 )*spinFactor;
+	//GAMMAS REMOVED
+	return barrier*((ss2*xi1*xi21*v1 + ss1*xi2*xi12*v2 ));
+//	return gam1*gam2*barrier*((ss2*xi1*xi21*v1 + ss1*xi2*xi12*v2 ));
+}
+
+void
+DblRegge30::updatePar( const AmpParameter& par ) {
+
+	if( par == m_a0 || par == m_aPrime ){
+
+		report( DEBUG, kModule ) << "in updatePar(): a0, aPrime = "
+			<< m_a0 << ", " << m_aPrime << endl;
+	}
 }
 
 void
 DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const {
+
 	TLorentzVector beam   ( pKin[0][1], pKin[0][2], pKin[0][3], pKin[0][0] );
 	TLorentzVector target (          0,          0,          0,      0.938 );
 	TLorentzVector proton ( pKin[1][1], pKin[1][2], pKin[1][3], pKin[1][0] );
@@ -123,8 +131,8 @@ DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const {
 
 	userVars[k_s]  = ( proton + eta + pi ).M2();
 	userVars[k_s1] = ( eta + pi ).M2();
-	userVars[k_t2]  = ( eta + pi - beam ).M2();
-
+	userVars[k_t]  = ( eta + pi - beam ).M2();
+	userVars[k_pi] = pi.M();
 	//	userVars[k_tmin] = eta.M2() - 2*eta.E()*beam.E() + 2*eta.Vect().Mag()*beam.Vect().Mag();
 
 	// m_fastParticle is set to 2 for eta and 3 for pi
@@ -159,23 +167,19 @@ DblRegge30::calcUserVars( GDouble** pKin, GDouble* userVars ) const {
 	userVars[k_phiGJ] = angles.Phi();
 	userVars[k_thetaGJ] = angles.Theta();
 
-
-
-
-
 	// the gamma functions are expensive -- as long as aPrime and a0
 	// aren't varying, then we can cache them
-	//	double alpha1 =  m_aPrime*userVars[k_t1] + m_a0;
-	//	double alpha2 =  m_aPrime_2*userVars[k_t]  + m_a0_2;
+	double alpha1 =  m_aPrime*m_aPrime*userVars[k_t1] + m_a0;
+	double alpha2 =  m_aPrime_2*m_aPrime_2*userVars[k_t]  + m_a0_2;
 
-	//	complex< double > gam1 = cgamma( -alpha1 );
-	//	complex< double > gam2 = cgamma( -alpha2 );
+//	complex< double > gam1 = cgamma( -alpha1 );
+//	complex< double > gam2 = cgamma( -alpha2 );
 
-	//	userVars[k_gam1_re] = real( gam1 );
-	//	userVars[k_gam1_im] = imag( gam1 );
+//	userVars[k_gam1_re] = real( gam1 );
+//	userVars[k_gam1_im] = imag( gam1 );
 
-	//	userVars[k_gam2_re] = real( gam2 );
-	//	userVars[k_gam2_im] = imag( gam2 );
+//	userVars[k_gam2_re] = real( gam2 );
+//	userVars[k_gam2_re] = imag( gam2 );
 }
 
 
@@ -261,7 +265,90 @@ DblRegge30::cgamma( complex<double> z ) const {
 
 	return g;
 }
+double DblRegge30::CHGM(double A, double B, double X) const{
+	double A0=A, A1=A, X0=X, HG = 0.0;
+	double TBA, TB, TA, Y0=0.0, Y1=0.0, RG, LA = (int) A, NL, R, M, INF = pow(10,300);
+	double sum1, sum2, R1, R2, HG1, HG2;
+	if (B == 0.0 || B == -abs( (int) B)){
+		HG = INF;
+	} else if(A == 0.0 || X == 0.0) {
+		HG = 1.0;
+	} else if(A == -1.0){
+		HG = 1.0 - X/B;
+	} else if(A == B){
+		HG = exp(X);
+	} else if (A-B == 1.0){
+		HG = (1.0+X/B)*exp(X);
+	} else if (A == 1.0 && B == 2.0){
+		HG = (exp(X)-1.0)/X;
+	} else if(A == (int)A && A < 0.0){
+		M = (int) -A;
+		R = 1.0;
+		HG = 1.0;
+		for (int k = 1; k<= M ; k++) {
+			R = R*(A+k-1.0)/k/(B+k-1.0)*X;
+			HG+=R;
+		}
+	}
+	if(HG != 0){return HG;}
 
-void DblRegge30::updatePar( const AmpParameter& par) {
+	if(X<0.0){
+		A = B-A;
+		A0 = A;
+		X = fabs(X);
+	}
+	if(A<2.0) {NL = 0;}
+	else{
+		NL = 1;
+		LA = (int) A;
+		A  = A-LA-1.0;
+	}
+	for (int n = 0; n<= NL; n++) {
+		if(A0 >= 2.0 ) { A+=1.0; }
+		if(X <= 30.0 + fabs(B) || A < 0.0){
+			HG = 1.0;
+			RG = 1.0;
+			for (int j = 1; j<= 500; j++) {
+				RG = RG*(A+j-1)/(j*(B+j-1))*X;
+				HG += RG;
+				if(fabs(RG/HG) < pow(10.,-15.)) {
+					if(n==0) {Y0 = HG;}
+					if(n==1) {Y1 = HG;}
+				}
+				continue;
+			}
+		} else {
+			TA = tgamma(A);
+			TB = tgamma(B);
+			TBA = tgamma(B-A);
+			sum1 = 1.0;
+			sum2 = 1.0;
+			R1 = 1.0;
+			R2 = 1.0;
+			for (int i = 1; i<=8; i++) {
+				R1 = - R1*(A+i-1)*(A-B+i)/(X*i);
+				R2 = - R2*(B-A+i-1)*(A-i)/(X*i);
+				sum1+=R1;
+				sum2+=R2;
+			}
+			HG1 = TB/TBA*pow(X,-A)*cos(M_PI*A)*sum1;
+			HG2 = TB/TA*exp(X)*pow(X,A-B)*sum2;
+			HG = HG1+HG2;
+		}
+		if(n==0) {Y0 = HG;}
+		if(n==1) {Y1 = HG;}
+	}
+	if(A0 >= 2.0){
+		for (int i=1; i<=LA-1; i++) {
+			HG = ((2.*A-B+X)*Y1+(B-A)*Y0)/A;
+			Y0 = Y1;
+			Y1 = HG;
+			A += 1.;
+		}
+	}
+	if(X0<0.0) {HG = HG*exp(X0);}
+	A = A1;
+	X = X0;
 
+	return HG;
 }
